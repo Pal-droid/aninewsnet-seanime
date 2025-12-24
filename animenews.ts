@@ -24,7 +24,6 @@ function init() {
                         from { opacity: 0; }
                         to { opacity: 1; }
                     }
-                    /* Gradient Text Animation */
                     @keyframes shimmer {
                         0% { background-position: -200% center; }
                         100% { background-position: 200% center; }
@@ -132,9 +131,15 @@ function init() {
                 }
 
                 function injectUI() {
-                    if (window.location.pathname !== "/" && !window.location.href.includes("43211")) return;
+                    // Check if we are on the root route
+                    const isRoot = window.location.pathname === "/";
+                    if (!isRoot) return;
+
+                    // Check if already injected
+                    if (document.getElementById("aninews-root")) return;
+
                     const divider = document.querySelector(DIVIDER_SELECTOR);
-                    if (!divider || document.getElementById("aninews-root")) return;
+                    if (!divider) return;
 
                     const container = document.createElement('div');
                     container.id = "aninews-root";
@@ -152,8 +157,19 @@ function init() {
                     scrapeNews();
                 }
 
+                // Polling logic 
+                setInterval(() => {
+                    const isRoot = window.location.pathname === "/";
+                    if (isRoot && !document.getElementById("aninews-root")) {
+                        injectUI();
+                    }
+                }, 500);
+
+                // Mutation observer as a secondary backup for fast UI changes
                 const observer = new MutationObserver(injectUI);
                 observer.observe(document.body, { childList: true, subtree: true });
+                
+                // Initial attempt
                 injectUI();
             })();
             `;
